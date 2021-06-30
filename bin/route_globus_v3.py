@@ -1,37 +1,17 @@
 #!/usr/bin/env python3
 #
-# Router to synchronize RSP, GLUE2, and RDR informaton into the Warehouse Resource tables
+# Router to synchronize Globus Collection informaton into the Warehouse Resource tables
 #
-# Author: JP Navarro, March 2020
+# Author: Eric Blau, June 2021
+#         JP Navarro, March 2020
 #         Jonathan Kim, October 2020
 #
 # Resource Group:Type
 #   Function
 # -------------------------------------------------------------------------------------------------
-# Organizations:*
-#   Write_RSP_Gateway_Providers
-#   Write_RSP_Support_Providers
-#   Write_RSP_HPC_Providers          -> (including XSEDE)
-#   Write_RDR_Providers
-#
-# Computing Tools and Services:*
-#   Write_RSP_HPC_Resources
-#   Write_RDR_BaseResources
-#   Write_RDR_SubResources
-#
-# Software:Vendor Software
-#   Write_RSP_Vendor_Software
 #
 # Software:Online Service
-#   Write_RSP_Network_Service        -> from RSP Operational Software
-#   Write_Glue2_Network_Service      -> from glue2.{AbstractService, Endpoint}
-#
-# Software:Executable Software
-#   Write_RSP_Executable_Software
-#   Write_Glue2_Executable_Software  ->from glue2.{ApplicationEnvironment, ApplicationHandle}
-#
-# Software:Packaged Software
-#   Write_RSP_Packaged_Software
+#   Write_Globus_Collections
 #
 import argparse
 from collections import Counter
@@ -68,6 +48,7 @@ import elasticsearch_dsl.connections
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 
 import pdb
+import globus_sdk
 
 # Used during initialization before loggin is enabled
 def eprint(*args, **kwargs):
@@ -355,6 +336,34 @@ class Router():
                     self.HTTP_CACHE[data_cache_key] = content
             return({contype: content})
 
+    def Get_Collections(self, url, contype):
+
+        AUTH_OAUTH = "auth.globus.org"
+        SCOPES = {
+              'urn:globus:auth:scope:auth.globus.org:view_identities': "Auth",
+              'urn:globus:auth:scope:transfer.api.globus.org:all': "Transfer",
+            };
+        SCOPESTRING = 'urn:globus:auth:scope:transfer.api.globus.org:all'
+
+        nac = globus_sdk.NativeAppAuthClient(CLIENT_ID)
+        authorizer = globus_sdk.RefreshTokenAuthorizer(
+                                         REFRESH_TOKEN, nac)
+
+        client = TransferClient(authorizer=authorizer)
+        endpoint_list = client.endpoint_search(filter_scope='my-endpoints',num_results=1000)
+
+        with open('EXTRA_ENDPOINTS_FILE') as f:
+            extra_endpoint_ids = f.read().splitlines()
+
+        #construct list of extra endpoints
+        extra_endpoints = []
+        for ep in extra_endpoint_ids:
+            epl = client.get_endpoint(ep)
+            extra_endpoints.append(epl)
+
+        content = endpoint_list.data.extend(extra_endpoints)
+        return({contype: content})
+
     def Analyze_CONTENT(self, content):
         # Write when needed
         return(0, '')
@@ -470,9 +479,10 @@ class Router():
                             CreationTime = datetime.now(timezone.utc),
                             Validity = self.DefaultValidity,
                             Affiliation = self.Affiliation,
-                            LocalID = item['DrupalNodeid'],
+                            LocalID = item['id'],
                             LocalType = config['LOCALTYPE'],
-                            LocalURL = item.get('DrupalUrl', config.get('SOURCEDEFAULTURL', None)),
+                            #LocalURL = item.get('DrupalUrl', config.get('SOURCEDEFAULTURL', None)),
+                            LocalURL = "https://app.globus.org/file-manager?origin_id="+item['id'],
                             CatalogMetaURL = self.CATALOGURN_to_URL(config['CATALOGURN']),
                             EntityJSON = item,
                         )
@@ -489,16 +499,15 @@ class Router():
                 resource = ResourceV3(
                             ID = myGLOBALURN,
                             Affiliation = self.Affiliation,
-                            LocalID = item['DrupalNodeid'],
+                            LocalID = item['id'],
                             QualityLevel = 'Production',
-                            Name = item['Name'],
+                            Name = item['display_name'],
                             ResourceGroup = myRESGROUP,
                             Type = myRESTYPE,
-                            ShortDescription = ShortDescription,
+                            ShortDescription = item['description'],
                             ProviderID = None,
                             Description = Description.html(ID=myGLOBALURN),
-                            Topics = item['FieldScience'],
-                            Keywords = None,
+                            Keywords = "Globus,File Transfer",
                             Audience = self.Affiliation,
                      )
                 resource.save()
@@ -538,7 +547,7 @@ class Router():
                 if stepconf['SRCURL'].scheme == 'file':
                     content = self.Read_CACHE(stepconf['SRCURL'].path, stepconf['LOCALTYPE'])
                 else:
-                    content = self.Get_HTTP(stepconf['SRCURL'], stepconf['LOCALTYPE'])
+                    content = self.Get_Collections(stepconf['SRCURL'], stepconf['LOCALTYPE'])
 
                 if stepconf['LOCALTYPE'] not in content:
                     (rc, message) = (False, 'JSON is missing the \'{}\' element'.format(contype))
