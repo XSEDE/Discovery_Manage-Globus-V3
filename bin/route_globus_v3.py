@@ -501,13 +501,19 @@ class Router():
 
             try:
                 ShortDescription = 'The {} Globus Collection'.format(item.get('display_name'))
+                #It is possible for the display_name to be None, which
+                #ResourceV3 really doesn't like.
+                resname = item.get('display_name')
+                if resname is None:
+                    resname = item.get('name')
+
                 Description = Format_Description(item.get('Description'))
                 resource = ResourceV3(
                             ID = myGLOBALURN,
                             Affiliation = self.Affiliation,
                             LocalID = item['id'],
                             QualityLevel = 'Production',
-                            Name = item.get('display_name'),
+                            Name = resname,
                             ResourceGroup = myRESGROUP,
                             Type = myRESTYPE,
                             ShortDescription = item['description'],
