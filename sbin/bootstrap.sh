@@ -1,6 +1,6 @@
 #!/bin/bash
 MY_BASE=/soft/warehouse-apps-1.0/Manage-GlobusEndpoints
-PYTHON_BASE=/soft/python/python-3.6.8-base
+PYTHON_BASE=/soft/python/python-3.8.11-base
 export LD_LIBRARY_PATH=${PYTHON_BASE}/lib
 PYTHON_ROOT=/soft/warehouse-apps-1.0/Manage-GlobusEndpoints/python
 source ${PYTHON_ROOT}/bin/activate

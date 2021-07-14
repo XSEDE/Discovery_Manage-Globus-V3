@@ -347,21 +347,26 @@ class Router():
 
         nac = globus_sdk.NativeAppAuthClient(self.config['GLOBUS_CLIENT_ID'])
         authorizer = globus_sdk.RefreshTokenAuthorizer(
-                                         REFRESH_TOKEN, nac)
+                                         self.config['GLOBUS_REFRESH_TOKEN'], nac)
 
-        client = TransferClient(authorizer=authorizer)
+        client = globus_sdk.TransferClient(authorizer=authorizer)
         endpoint_list = client.endpoint_search(filter_scope='my-endpoints',num_results=1000)
 
-        with open('EXTRA_ENDPOINTS_FILE') as f:
-            extra_endpoint_ids = f.read().splitlines()
+        try:
+            with open(self.config['EXTRA_ENDPOINTS_FILE']) as f:
+                extra_endpoint_ids = f.read().splitlines()
+        except:
+            pass
+        else:
+            #construct list of extra endpoints
+            extra_endpoints = []
+            if extra_endpoint_ids:
+                for ep in extra_endpoint_ids:
+                    epl = client.get_endpoint(ep)
+                    extra_endpoints.append(epl)
 
-        #construct list of extra endpoints
-        extra_endpoints = []
-        for ep in extra_endpoint_ids:
-            epl = client.get_endpoint(ep)
-            extra_endpoints.append(epl)
-
-        content = endpoint_list.data.extend(extra_endpoints)
+            #content = endpoint_list.data.extend(extra_endpoints)
+            content = endpoint_list.data
         return({contype: content})
 
     def Analyze_CONTENT(self, content):
@@ -468,9 +473,10 @@ class Router():
         for item in ResourceV3Local.objects.filter(Affiliation__exact = self.Affiliation).filter(ID__startswith = config['URNPREFIX']):
             cur[item.ID] = item
 
-
+        eprint(contype)
+        eprint(content.keys())
         for item in content[contype]:
-            myGLOBALURN = self.format_GLOBALURN(config['URNPREFIX'], 'globusuuid', item['GlobusUUID'])
+            myGLOBALURN = self.format_GLOBALURN(config['URNPREFIX'], 'globusuuid', item['id'])
             if item.get('Name'):
                 self.GLOBUS_NAME_URNMAP[item['Name']] = myGLOBALURN
             try:
