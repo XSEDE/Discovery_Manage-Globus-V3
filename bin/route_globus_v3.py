@@ -477,8 +477,8 @@ class Router():
         eprint(content.keys())
         for item in content[contype]:
             myGLOBALURN = self.format_GLOBALURN(config['URNPREFIX'], 'globusuuid', item['id'])
-            if item.get('Name'):
-                self.GLOBUS_NAME_URNMAP[item['Name']] = myGLOBALURN
+            if item.get('display_name'):
+                self.GLOBUS_NAME_URNMAP[item['display_name']] = myGLOBALURN
             try:
                 local = ResourceV3Local(
                             ID = myGLOBALURN,
@@ -490,7 +490,7 @@ class Router():
                             #LocalURL = item.get('DrupalUrl', config.get('SOURCEDEFAULTURL', None)),
                             LocalURL = "https://app.globus.org/file-manager?origin_id="+item['id'],
                             CatalogMetaURL = self.CATALOGURN_to_URL(config['CATALOGURN']),
-                            EntityJSON = item,
+                            EntityJSON = item.data,
                         )
                 local.save()
             except Exception as e:
@@ -500,14 +500,14 @@ class Router():
             new[myGLOBALURN] = local
 
             try:
-                ShortDescription = 'The {} Science Gateway Project'.format(item['Name'])
+                ShortDescription = 'The {} Globus Collection'.format(item.get('display_name'))
                 Description = Format_Description(item.get('Description'))
                 resource = ResourceV3(
                             ID = myGLOBALURN,
                             Affiliation = self.Affiliation,
                             LocalID = item['id'],
                             QualityLevel = 'Production',
-                            Name = item['display_name'],
+                            Name = item.get('display_name'),
                             ResourceGroup = myRESGROUP,
                             Type = myRESTYPE,
                             ShortDescription = item['description'],
