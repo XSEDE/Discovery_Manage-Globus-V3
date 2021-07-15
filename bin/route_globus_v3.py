@@ -510,7 +510,7 @@ class Router():
                     description_addendum = " Contact email: {}\nUsage documentation: https://www.globus.org/data-transfer"
                 else:
                     description_addendum = " Usage documentation: https://www.globus.org/data-transfer"
-                Description = Format_Description(item.get('Description')+description_addendum)
+                Description = Format_Description(item.get('Description',"")+description_addendum)
                 globuskeywords = item.get('keywords')
                 if globuskeywords:
                     keywords = globuskeywords+",Globus,File Transfer"
