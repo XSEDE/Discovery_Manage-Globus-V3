@@ -463,7 +463,7 @@ class Router():
 
     def Write_Globus_Collections(self, content, contype, config):
         start_utc = datetime.now(timezone.utc)
-        myRESGROUP = 'Organizations'
+        myRESGROUP = 'Software'
         myRESTYPE = 'Online Service'
         me = '{} to {}({}:{})'.format(sys._getframe().f_code.co_name, self.WAREHOUSE_CATALOG, myRESGROUP, myRESTYPE)
         self.PROCESSING_SECONDS[me] = getattr(self.PROCESSING_SECONDS, me, 0)
@@ -500,14 +500,19 @@ class Router():
             new[myGLOBALURN] = local
 
             try:
-                ShortDescription = 'The {} Globus Collection'.format(item.get('display_name'))
                 #It is possible for the display_name to be None, which
                 #ResourceV3 really doesn't like.
-                resname = item.get('display_name')
-                if resname is None:
-                    resname = item.get('name')
+                displayname = item.get('display_name')
+                if displayname is None:
+                    displayname = item.get('name')
+                resname = 'XSEDE Globus Connect Server {}'.format(displayname)
 
-                Description = Format_Description(item.get('Description'))
+                contact_email = item.get('contact_email')
+                if contact_email:
+                    description_addendum = " Contact email: {}\nUsage documentation: https://www.globus.org/data-transfer"
+                else:
+                    description_addendum = " Usage documentation: https://www.globus.org/data-transfer"
+                Description = Format_Description(item.get('Description')+description_addendum)
                 resource = ResourceV3(
                             ID = myGLOBALURN,
                             Affiliation = self.Affiliation,
@@ -516,10 +521,10 @@ class Router():
                             Name = resname,
                             ResourceGroup = myRESGROUP,
                             Type = myRESTYPE,
-                            ShortDescription = item['description'],
+                            ShortDescription = resname,
                             ProviderID = None,
                             Description = Description.html(ID=myGLOBALURN),
-                            Keywords = "Globus,File Transfer",
+                            Keywords = '{}Globus,File Transfer'.format(item.get('keywords')+",",""),
                             Audience = self.Affiliation,
                      )
                 resource.save()
