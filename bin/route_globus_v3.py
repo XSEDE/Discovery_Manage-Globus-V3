@@ -505,12 +505,13 @@ class Router():
                     displayname = item.get('name')
                 resname = 'XSEDE Globus Connect Server {}'.format(displayname)
 
+                Description = Format_Description(item.get('Description',""))
+                Description.blank_line()
                 contact_email = item.get('contact_email')
-                if contact_email:
-                    description_addendum = " Contact email: {}\nUsage documentation: https://www.globus.org/data-transfer"
-                else:
-                    description_addendum = " Usage documentation: https://www.globus.org/data-transfer"
-                Description = Format_Description(item.get('Description',"")+description_addendum)
+                if contact_email is not None and contact_email is not '':
+                    Description.append('- Contact Email: {}'.format(contact_email))
+                    Description.blank_line()
+                Description.append('- Usage documentation: https://www.globus.org/data-transfer')
                 globuskeywords = item.get('keywords')
                 if globuskeywords:
                     keywords = globuskeywords+",Globus,File Transfer"
