@@ -473,8 +473,6 @@ class Router():
         for item in ResourceV3Local.objects.filter(Affiliation__exact = self.Affiliation).filter(ID__startswith = config['URNPREFIX']):
             cur[item.ID] = item
 
-        eprint(contype)
-        eprint(content.keys())
         for item in content[contype]:
             myGLOBALURN = self.format_GLOBALURN(config['URNPREFIX'], 'globusuuid', item['id'])
             if item.get('display_name'):
@@ -513,6 +511,11 @@ class Router():
                 else:
                     description_addendum = " Usage documentation: https://www.globus.org/data-transfer"
                 Description = Format_Description(item.get('Description')+description_addendum)
+                globuskeywords = item.get('keywords')
+                if globuskeywords:
+                    keywords = globuskeywords+",Globus,File Transfer"
+                else:
+                    keywords = "Globus,File Transfer"
                 resource = ResourceV3(
                             ID = myGLOBALURN,
                             Affiliation = self.Affiliation,
@@ -524,7 +527,7 @@ class Router():
                             ShortDescription = resname,
                             ProviderID = None,
                             Description = Description.html(ID=myGLOBALURN),
-                            Keywords = '{}Globus,File Transfer'.format(item.get('keywords')+",",""),
+                            Keywords = keywords,
                             Audience = self.Affiliation,
                      )
                 resource.save()
