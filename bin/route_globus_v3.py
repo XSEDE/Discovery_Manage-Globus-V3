@@ -520,6 +520,8 @@ class Router():
                     Description.append('- Info Link: {}'.format(info_link))
                     Description.blank_line()
                 Description.append('- Usage documentation: https://www.globus.org/data-transfer')
+                Description.blank_line()
+                Description.append('- Globus UUID: {}'.format(item.get('id'))
                 globuskeywords = item.get('keywords')
                 if globuskeywords:
                     keywords = globuskeywords+",Globus,File Transfer"
