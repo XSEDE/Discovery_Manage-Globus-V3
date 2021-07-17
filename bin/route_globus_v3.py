@@ -505,7 +505,7 @@ class Router():
                     displayname = item.get('name')
                 resname = 'XSEDE Globus Connect Server {}'.format(displayname)
 
-                Description = Format_Description(item.get('Description',resname))
+                Description = Format_Description(item.get('description',resname))
                 Description.blank_line()
                 contact_email = item.get('contact_email')
                 if contact_email is not None and contact_email is not '':
