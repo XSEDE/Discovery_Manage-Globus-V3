@@ -521,7 +521,7 @@ class Router():
                     Description.blank_line()
                 Description.append('- Usage documentation: https://www.globus.org/data-transfer')
                 Description.blank_line()
-                Description.append('- Globus link: https://app.globus.org/file-manager/collections{}'.formaDt(item.get('id')))
+                Description.append('- Globus link: https://app.globus.org/file-manager/collections{}'.format(item.get('id')))
                 globuskeywords = item.get('keywords')
                 if globuskeywords:
                     keywords = globuskeywords+",Globus,File Transfer"
