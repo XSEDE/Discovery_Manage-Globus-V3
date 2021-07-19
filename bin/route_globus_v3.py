@@ -507,21 +507,22 @@ class Router():
 
                 Description = Format_Description(item.get('description',resname))
                 Description.blank_line()
+                Description.append('- Access Collection: https://app.globus.org/file-manager/collections/{}'.format(item.get('id')))
+                Description.blank_line()
+                Description.append('- Usage documentation: https://www.globus.org/data-transfer')
+                Description.blank_line()
+                info_link = item.get('info_link')
+                if info_link is not None and info_link is not '':
+                    Description.append('- Collection Information: {}'.format(info_link))
+                    Description.blank_line()
+                contact_email = item.get('contact_email')
+                if contact_email is not None and contact_email is not '':
+                    Description.append('- Support Contact: {}'.format(contact_email))
+                    Description.blank_line()
                 organization = item.get('organization')
                 if organization is not None and organization is not '':
                     Description.append('- Organization: {}'.format(organization))
                     Description.blank_line()
-                contact_email = item.get('contact_email')
-                if contact_email is not None and contact_email is not '':
-                    Description.append('- Contact Email: {}'.format(contact_email))
-                    Description.blank_line()
-                info_link = item.get('info_link')
-                if info_link is not None and info_link is not '':
-                    Description.append('- Info Link: {}'.format(info_link))
-                    Description.blank_line()
-                Description.append('- Usage documentation: https://www.globus.org/data-transfer')
-                Description.blank_line()
-                Description.append('- Globus link: https://app.globus.org/file-manager/collections{}'.format(item.get('id')))
                 globuskeywords = item.get('keywords')
                 if globuskeywords:
                     keywords = globuskeywords+",Globus,File Transfer"
