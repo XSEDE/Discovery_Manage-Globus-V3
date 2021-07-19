@@ -525,9 +525,9 @@ class Router():
                     Description.blank_line()
                 globuskeywords = item.get('keywords')
                 if globuskeywords:
-                    keywords = globuskeywords+",Globus,File Transfer"
+                    keywords = globuskeywords+",Globus,File Transfer,GCS"
                 else:
-                    keywords = "Globus,File Transfer"
+                    keywords = "Globus,File Transfer,GCS"
                 resource = ResourceV3(
                             ID = myGLOBALURN,
                             Affiliation = self.Affiliation,
