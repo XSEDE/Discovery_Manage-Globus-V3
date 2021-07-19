@@ -535,7 +535,7 @@ class Router():
                             Name = resname,
                             ResourceGroup = myRESGROUP,
                             Type = myRESTYPE,
-                            ShortDescription = resname,
+                            ShortDescription = item.get('description',resname),
                             ProviderID = None,
                             Description = Description.html(ID=myGLOBALURN),
                             Keywords = keywords,
