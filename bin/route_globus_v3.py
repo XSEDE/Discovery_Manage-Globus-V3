@@ -507,7 +507,7 @@ class Router():
 
                 Description = Format_Description(item.get('description',resname))
                 Description.blank_line()
-                Description.append('- Access Collection: https://app.globus.org/file-manager/collections/{}'.format(item.get('id')))
+                Description.append('- Access Collection: https://app.globus.org/file-manager?origin_id={}'.format(item.get('id')))
                 Description.blank_line()
                 Description.append('- Usage documentation: https://www.globus.org/data-transfer')
                 Description.blank_line()
@@ -522,6 +522,10 @@ class Router():
                 organization = item.get('organization')
                 if organization is not None and organization is not '':
                     Description.append('- Organization: {}'.format(organization))
+                    Description.blank_line()
+                gcs_version = item.get('gcs_version')
+                if gcs_version is not None and gcs_version is not '':
+                    Description.append('- GCS Version: {}'.format(gcs_version))
                     Description.blank_line()
                 globuskeywords = item.get('keywords')
                 if globuskeywords:
