@@ -363,10 +363,13 @@ class Router():
             if extra_endpoint_ids:
                 for ep in extra_endpoint_ids:
                     epl = client.get_endpoint(ep)
-                    extra_endpoints.append(epl)
+                    #extra_endpoints = extra_endpoints +epl['DATA']
+                    extra_endpoints.append(epl.data)
 
             #content = endpoint_list.data.extend(extra_endpoints)
-            content = endpoint_list.data
+            eld = endpoint_list.data
+            content = eld + extra_endpoints
+
         return({contype: content})
 
     def Analyze_CONTENT(self, content):
