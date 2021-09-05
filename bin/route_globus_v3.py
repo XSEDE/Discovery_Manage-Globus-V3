@@ -345,7 +345,7 @@ class Router():
             };
         SCOPESTRING = 'urn:globus:auth:scope:transfer.api.globus.org:all'
 
-        nac = globus_sdk.NativeAppAuthClient(CLIENT_ID)
+        nac = globus_sdk.NativeAppAuthClient(self.config['GLOBUS_CLIENT_ID'])
         authorizer = globus_sdk.RefreshTokenAuthorizer(
                                          REFRESH_TOKEN, nac)
 
