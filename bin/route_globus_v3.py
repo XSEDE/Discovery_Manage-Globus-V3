@@ -347,21 +347,28 @@ class Router():
 
         nac = globus_sdk.NativeAppAuthClient(self.config['GLOBUS_CLIENT_ID'])
         authorizer = globus_sdk.RefreshTokenAuthorizer(
-                                         REFRESH_TOKEN, nac)
+                                         self.config['GLOBUS_REFRESH_TOKEN'], nac)
 
-        client = TransferClient(authorizer=authorizer)
+        client = globus_sdk.TransferClient(authorizer=authorizer)
         endpoint_list = client.endpoint_search(filter_scope='my-endpoints',num_results=1000)
 
-        with open('EXTRA_ENDPOINTS_FILE') as f:
-            extra_endpoint_ids = f.read().splitlines()
+        try:
+            with open(self.config['EXTRA_ENDPOINTS_FILE']) as f:
+                extra_endpoint_ids = f.read().splitlines()
+        except:
+            pass
+        else:
+            #construct list of extra endpoints
+            extra_endpoints = []
+            if extra_endpoint_ids:
+                for ep in extra_endpoint_ids:
+                    epl = client.get_endpoint(ep)
+                    extra_endpoints.append(epl)
 
-        #construct list of extra endpoints
-        extra_endpoints = []
-        for ep in extra_endpoint_ids:
-            epl = client.get_endpoint(ep)
-            extra_endpoints.append(epl)
+            #content = endpoint_list.data.extend(extra_endpoints)
+            eld = endpoint_list.data
+            content = eld + extra_endpoints
 
-        content = endpoint_list.data.extend(extra_endpoints)
         return({contype: content})
 
     def Analyze_CONTENT(self, content):
@@ -458,7 +465,7 @@ class Router():
 
     def Write_Globus_Collections(self, content, contype, config):
         start_utc = datetime.now(timezone.utc)
-        myRESGROUP = 'Organizations'
+        myRESGROUP = 'Software'
         myRESTYPE = 'Online Service'
         me = '{} to {}({}:{})'.format(sys._getframe().f_code.co_name, self.WAREHOUSE_CATALOG, myRESGROUP, myRESTYPE)
         self.PROCESSING_SECONDS[me] = getattr(self.PROCESSING_SECONDS, me, 0)
@@ -468,11 +475,10 @@ class Router():
         for item in ResourceV3Local.objects.filter(Affiliation__exact = self.Affiliation).filter(ID__startswith = config['URNPREFIX']):
             cur[item.ID] = item
 
-
         for item in content[contype]:
-            myGLOBALURN = self.format_GLOBALURN(config['URNPREFIX'], 'globusuuid', item['GlobusUUID'])
-            if item.get('Name'):
-                self.GLOBUS_NAME_URNMAP[item['Name']] = myGLOBALURN
+            myGLOBALURN = self.format_GLOBALURN(config['URNPREFIX'], 'globusuuid', item['id'])
+            if item.get('display_name'):
+                self.GLOBUS_NAME_URNMAP[item['display_name']] = myGLOBALURN
             try:
                 local, created = ResourceV3Local.objects.get_or_create(
                             ID = myGLOBALURN,
@@ -484,7 +490,7 @@ class Router():
                             #LocalURL = item.get('DrupalUrl', config.get('SOURCEDEFAULTURL', None)),
                             LocalURL = "https://app.globus.org/file-manager?origin_id="+item['id'],
                             CatalogMetaURL = self.CATALOGURN_to_URL(config['CATALOGURN']),
-                            EntityJSON = item,
+                            EntityJSON = item.data,
                         )
                 local.save()
             except Exception as e:
@@ -494,20 +500,52 @@ class Router():
             new[myGLOBALURN] = local
 
             try:
-                ShortDescription = 'The {} Science Gateway Project'.format(item['Name'])
-                Description = Format_Description(item.get('Description'))
+                #It is possible for the display_name to be None, which
+                #ResourceV3 really doesn't like.
+                displayname = item.get('display_name')
+                if displayname is None:
+                    displayname = item.get('name')
+                resname = 'XSEDE Globus Connect Server {}'.format(displayname)
+
+                Description = Format_Description(item.get('description',resname))
+                Description.blank_line()
+                Description.append('- Access Collection: https://app.globus.org/file-manager?origin_id={}'.format(item.get('id')))
+                Description.blank_line()
+                Description.append('- Usage documentation: https://www.globus.org/data-transfer')
+                Description.blank_line()
+                info_link = item.get('info_link')
+                if info_link is not None and info_link is not '':
+                    Description.append('- Collection Information: {}'.format(info_link))
+                    Description.blank_line()
+                contact_email = item.get('contact_email')
+                if contact_email is not None and contact_email is not '':
+                    Description.append('- Support Contact: {}'.format(contact_email))
+                    Description.blank_line()
+                organization = item.get('organization')
+                if organization is not None and organization is not '':
+                    Description.append('- Organization: {}'.format(organization))
+                    Description.blank_line()
+                gcs_version = item.get('gcs_version')
+                if gcs_version is not None and gcs_version is not '':
+                    Description.append('- GCS Version: {}'.format(gcs_version))
+                    Description.blank_line()
+                globuskeywords = item.get('keywords')
+                if globuskeywords:
+                    keywords = globuskeywords+",Globus,File Transfer,GCS"
+                else:
+                    keywords = "Globus,File Transfer,GCS"
                 resource, created = ResourceV3.objects.get_or_create(
                             ID = myGLOBALURN,
                             Affiliation = self.Affiliation,
                             LocalID = item['id'],
                             QualityLevel = 'Production',
-                            Name = item['display_name'],
+                            Name = resname,
                             ResourceGroup = myRESGROUP,
                             Type = myRESTYPE,
-                            ShortDescription = item['description'],
+                            ShortDescription = item.get('description',resname),
                             ProviderID = None,
                             Description = Description.html(ID=myGLOBALURN),
-                            Keywords = "Globus,File Transfer",
+                            Keywords = keywords,
                             Audience = self.Affiliation,
                      )
                 resource.save()

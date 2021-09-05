@@ -1,3 +1,6 @@
+tag-0.18-20210905c JP
+  - Merge all the rest of code that was in producton as 0.17 but missing from GIT
+
 tag-0.18-20210905b JP
   - Fix to use config GLOBUS_CLIENT_ID
 
