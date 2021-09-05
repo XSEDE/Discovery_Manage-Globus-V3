@@ -429,7 +429,7 @@ class Router():
                 relationType = newRELATIONS[relatedID]
                 relationHASH = md5(':'.join([relatedID, relationType]).encode('UTF-8')).hexdigest()
                 relationID = ':'.join([myURN, relationHASH])
-                relation = ResourceV3Relation(
+                relation, created = ResourceV3Relation.objects.get_or_create(
                             ID = relationID,
                             FirstResourceID = myURN,
                             SecondResourceID = relatedID,
@@ -474,7 +474,7 @@ class Router():
             if item.get('Name'):
                 self.GLOBUS_NAME_URNMAP[item['Name']] = myGLOBALURN
             try:
-                local = ResourceV3Local(
+                local, created = ResourceV3Local.objects.get_or_create(
                             ID = myGLOBALURN,
                             CreationTime = datetime.now(timezone.utc),
                             Validity = self.DefaultValidity,
@@ -496,7 +496,7 @@ class Router():
             try:
                 ShortDescription = 'The {} Science Gateway Project'.format(item['Name'])
                 Description = Format_Description(item.get('Description'))
-                resource = ResourceV3(
+                resource, created = ResourceV3.objects.get_or_create(
                             ID = myGLOBALURN,
                             Affiliation = self.Affiliation,
                             LocalID = item['id'],

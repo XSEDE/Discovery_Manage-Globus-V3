@@ -1,0 +1,2 @@
+tag-0.18-20210905 JP
+  - Switch to .objects.get_or_create for Drupal 3.0
