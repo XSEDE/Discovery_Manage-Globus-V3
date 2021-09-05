@@ -436,11 +436,13 @@ class Router():
                 relationType = newRELATIONS[relatedID]
                 relationHASH = md5(':'.join([relatedID, relationType]).encode('UTF-8')).hexdigest()
                 relationID = ':'.join([myURN, relationHASH])
-                relation, created = ResourceV3Relation.objects.get_or_create(
+                relation, created = ResourceV3Relation.objects.update_or_create(
                             ID = relationID,
-                            FirstResourceID = myURN,
-                            SecondResourceID = relatedID,
-                            RelationType = relationType,
+                            defaults={
+                                FirstResourceID = myURN,
+                                SecondResourceID = relatedID,
+                                RelationType = relationType
+                            },
                      )
                 relation.save()
             except Exception as e:
@@ -480,17 +482,19 @@ class Router():
             if item.get('display_name'):
                 self.GLOBUS_NAME_URNMAP[item['display_name']] = myGLOBALURN
             try:
-                local, created = ResourceV3Local.objects.get_or_create(
+                local, created = ResourceV3Local.objects.update_or_create(
                             ID = myGLOBALURN,
-                            CreationTime = datetime.now(timezone.utc),
-                            Validity = self.DefaultValidity,
-                            Affiliation = self.Affiliation,
-                            LocalID = item['id'],
-                            LocalType = config['LOCALTYPE'],
-                            #LocalURL = item.get('DrupalUrl', config.get('SOURCEDEFAULTURL', None)),
-                            LocalURL = "https://app.globus.org/file-manager?origin_id="+item['id'],
-                            CatalogMetaURL = self.CATALOGURN_to_URL(config['CATALOGURN']),
-                            EntityJSON = item.data,
+                            defaults={
+                                CreationTime = datetime.now(timezone.utc),
+                                Validity = self.DefaultValidity,
+                                Affiliation = self.Affiliation,
+                                LocalID = item['id'],
+                                LocalType = config['LOCALTYPE'],
+                                #LocalURL = item.get('DrupalUrl', config.get('SOURCEDEFAULTURL', None)),
+                                LocalURL = "https://app.globus.org/file-manager?origin_id="+item['id'],
+                                CatalogMetaURL = self.CATALOGURN_to_URL(config['CATALOGURN']),
+                                EntityJSON = item.data
+                            },
                         )
                 local.save()
             except Exception as e:
@@ -534,19 +538,21 @@ class Router():
                     keywords = globuskeywords+",Globus,File Transfer,GCS"
                 else:
                     keywords = "Globus,File Transfer,GCS"
-                resource, created = ResourceV3.objects.get_or_create(
+                resource, created = ResourceV3.objects.update_or_create(
                             ID = myGLOBALURN,
-                            Affiliation = self.Affiliation,
-                            LocalID = item['id'],
-                            QualityLevel = 'Production',
-                            Name = resname,
-                            ResourceGroup = myRESGROUP,
-                            Type = myRESTYPE,
-                            ShortDescription = item.get('description',resname),
-                            ProviderID = None,
-                            Description = Description.html(ID=myGLOBALURN),
-                            Keywords = keywords,
-                            Audience = self.Affiliation,
+                            defaults={
+                                Affiliation = self.Affiliation,
+                                LocalID = item['id'],
+                                QualityLevel = 'Production',
+                                Name = resname,
+                                ResourceGroup = myRESGROUP,
+                                Type = myRESTYPE,
+                                ShortDescription = item.get('description',resname),
+                                ProviderID = None,
+                                Description = Description.html(ID=myGLOBALURN),
+                                Keywords = keywords,
+                                Audience = self.Affiliation
+                            },
                      )
                 resource.save()
                 if self.ESEARCH:

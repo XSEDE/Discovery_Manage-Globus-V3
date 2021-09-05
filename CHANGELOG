@@ -1,3 +1,6 @@
+tag-0.18-20210905d JP
+  - Switch to .objects.update_or_create for Drupal 3.0
+
 tag-0.18-20210905c JP
   - Merge all the rest of code that was in producton as 0.17 but missing from GIT
 
