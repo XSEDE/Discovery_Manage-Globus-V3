@@ -1,3 +1,6 @@
+tag-0.18-20210905e JP
+  - Use defaults={} correctly in update_or_create
+
 tag-0.18-20210905d JP
   - Switch to .objects.update_or_create for Drupal 3.0
 

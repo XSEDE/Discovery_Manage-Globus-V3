@@ -439,9 +439,9 @@ class Router():
                 relation, created = ResourceV3Relation.objects.update_or_create(
                             ID = relationID,
                             defaults={
-                                FirstResourceID = myURN,
-                                SecondResourceID = relatedID,
-                                RelationType = relationType
+                                'FirstResourceID': myURN,
+                                'SecondResourceID': relatedID,
+                                'RelationType': relationType
                             },
                      )
                 relation.save()
@@ -485,15 +485,14 @@ class Router():
                 local, created = ResourceV3Local.objects.update_or_create(
                             ID = myGLOBALURN,
                             defaults={
-                                CreationTime = datetime.now(timezone.utc),
-                                Validity = self.DefaultValidity,
-                                Affiliation = self.Affiliation,
-                                LocalID = item['id'],
-                                LocalType = config['LOCALTYPE'],
-                                #LocalURL = item.get('DrupalUrl', config.get('SOURCEDEFAULTURL', None)),
-                                LocalURL = "https://app.globus.org/file-manager?origin_id="+item['id'],
-                                CatalogMetaURL = self.CATALOGURN_to_URL(config['CATALOGURN']),
-                                EntityJSON = item.data
+                                'CreationTime': datetime.now(timezone.utc),
+                                'Validity': self.DefaultValidity,
+                                'Affiliation': self.Affiliation,
+                                'LocalID': item['id'],
+                                'LocalType': config['LOCALTYPE'],
+                                'LocalURL': "https://app.globus.org/file-manager?origin_id="+item['id'],
+                                'CatalogMetaURL': self.CATALOGURN_to_URL(config['CATALOGURN']),
+                                'EntityJSON': item.data
                             },
                         )
                 local.save()
@@ -541,17 +540,17 @@ class Router():
                 resource, created = ResourceV3.objects.update_or_create(
                             ID = myGLOBALURN,
                             defaults={
-                                Affiliation = self.Affiliation,
-                                LocalID = item['id'],
-                                QualityLevel = 'Production',
-                                Name = resname,
-                                ResourceGroup = myRESGROUP,
-                                Type = myRESTYPE,
-                                ShortDescription = item.get('description',resname),
-                                ProviderID = None,
-                                Description = Description.html(ID=myGLOBALURN),
-                                Keywords = keywords,
-                                Audience = self.Affiliation
+                                'Affiliation': self.Affiliation,
+                                'LocalID': item['id'],
+                                'QualityLevel': 'Production',
+                                'Name': resname,
+                                'ResourceGroup': myRESGROUP,
+                                'Type': myRESTYPE,
+                                'ShortDescription': item.get('description',resname),
+                                'ProviderID': None,
+                                'Description': Description.html(ID=myGLOBALURN),
+                                'Keywords': keywords,
+                                'Audience': self.Affiliation
                             },
                      )
                 resource.save()
