@@ -1,3 +1,6 @@
+tag-0.18-20220220e JP
+  - Fix incorrect "is not" testing for a a value that isn't None or empty string
+
 tag-0.18-20210905e JP
   - Use defaults={} correctly in update_or_create
 

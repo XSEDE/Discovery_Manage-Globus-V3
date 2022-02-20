@@ -517,19 +517,19 @@ class Router():
                 Description.append('- Usage documentation: https://www.globus.org/data-transfer')
                 Description.blank_line()
                 info_link = item.get('info_link')
-                if info_link is not None and info_link is not '':
+                if info_link:       # Has a non-empty value
                     Description.append('- Collection Information: {}'.format(info_link))
                     Description.blank_line()
                 contact_email = item.get('contact_email')
-                if contact_email is not None and contact_email is not '':
+                if contact_email:
                     Description.append('- Support Contact: {}'.format(contact_email))
                     Description.blank_line()
                 organization = item.get('organization')
-                if organization is not None and organization is not '':
+                if organization:
                     Description.append('- Organization: {}'.format(organization))
                     Description.blank_line()
                 gcs_version = item.get('gcs_version')
-                if gcs_version is not None and gcs_version is not '':
+                if gcs_version:
                     Description.append('- GCS Version: {}'.format(gcs_version))
                     Description.blank_line()
                 globuskeywords = item.get('keywords')
